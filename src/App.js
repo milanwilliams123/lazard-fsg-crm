@@ -29,10 +29,10 @@ const LAZARD_BANKERS_SEED = [
   { id: "lb19", name: "Ryan Patel", title: "Vice President", sector: "Financial Institutions", email: "rpatel@lazard.com", phone: "+1 212 632 6119" },
   // Sponsor Coverage Bankers (cross-sector, firm relationship owners)
   { id: "lb20", name: "Bill Hart", title: "Managing Director", sector: "Sponsor Coverage", sponsorCoverage: true, sponsorFirms: ["sp1","sp2","sp3","sp4","sp9"], email: "bhart@lazard.com", phone: "+1 212 632 6120" },
-  { id: "lb21", name: "Taylor Auman", title: "Vice President", sector: "Sponsor Coverage", sponsorCoverage: true, sponsorFirms: ["sp1","sp5","sp6","sp10","sp12"], email: "tauman@lazard.com", phone: "+1 212 632 6121" },
-  { id: "lb22", name: "Courtney Haydon", title: "Vice President", sector: "Sponsor Coverage", sponsorCoverage: true, sponsorFirms: ["sp2","sp3","sp7","sp8","sp11"], email: "chaydon@lazard.com", phone: "+1 212 632 6122" },
-  { id: "lb23", name: "Adam Cady", title: "Vice President", sector: "Sponsor Coverage", sponsorCoverage: true, sponsorFirms: ["sp4","sp5","sp7","sp9","sp11"], email: "acady@lazard.com", phone: "+1 212 632 6123" },
-  { id: "lb24", name: "Teddy Henderson", title: "Vice President", sector: "Sponsor Coverage", sponsorCoverage: true, sponsorFirms: ["sp1","sp2","sp6","sp8","sp10"], email: "thenderson@lazard.com", phone: "+1 212 632 6124" },
+  { id: "lb21", name: "Taylor Auman", title: "Director", sector: "Sponsor Coverage", sponsorCoverage: true, sponsorFirms: ["sp1","sp5","sp6","sp10","sp12"], email: "tauman@lazard.com", phone: "+1 212 632 6121" },
+  { id: "lb22", name: "Courtney Haydon", title: "Managing Director", sector: "Sponsor Coverage", sponsorCoverage: true, sponsorFirms: ["sp2","sp3","sp7","sp8","sp11"], email: "chaydon@lazard.com", phone: "+1 212 632 6122" },
+  { id: "lb23", name: "Adam Cady", title: "Managing Director", sector: "Sponsor Coverage", sponsorCoverage: true, sponsorFirms: ["sp4","sp5","sp7","sp9","sp11"], email: "acady@lazard.com", phone: "+1 212 632 6123" },
+  { id: "lb24", name: "Teddy Henderson", title: "Director", sector: "Sponsor Coverage", sponsorCoverage: true, sponsorFirms: ["sp1","sp2","sp6","sp8","sp10"], email: "thenderson@lazard.com", phone: "+1 212 632 6124" },
   { id: "lb25", name: "Daniel Gajewski", title: "Vice President", sector: "Sponsor Coverage", sponsorCoverage: true, sponsorFirms: ["sp3","sp4","sp9","sp10","sp12"], email: "dgajewski@lazard.com", phone: "+1 212 632 6125" },
 ];
 
