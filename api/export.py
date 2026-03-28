@@ -36,9 +36,9 @@ def border_outer(pos, weight="medium"):
     else:               return Border(top=med, bottom=med, left=none, right=none)
 
 def apply_merged_border(ws, row, ncols=6):
+    b = Side(style="medium", color=BORDER_C)
     for ci in range(1, ncols + 1):
-        pos = "left" if ci == 1 else ("right" if ci == ncols else "mid")
-        ws.cell(row, ci).border = border_outer(pos)
+        ws.cell(row, ci).border = Border(bottom=b)
 
 def apply_table_outer_border(ws, top_row, bottom_row, left_col, right_col):
     med = Side(style="medium", color=NAVY)
