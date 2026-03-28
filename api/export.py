@@ -28,6 +28,31 @@ def border(weight="thin"):
     s = Side(style=weight, color=BORDER_C)
     return Border(left=s, right=s, top=s, bottom=s)
 
+def border_outer(pos, weight="medium"):
+    med = Side(style=weight, color=BORDER_C)
+    none = Side(style=None)
+    if pos == "left":   return Border(left=med, top=med, bottom=med, right=none)
+    elif pos == "right": return Border(right=med, top=med, bottom=med, left=none)
+    else:               return Border(top=med, bottom=med, left=none, right=none)
+
+def apply_merged_border(ws, row, ncols=6):
+    for ci in range(1, ncols + 1):
+        pos = "left" if ci == 1 else ("right" if ci == ncols else "mid")
+        ws.cell(row, ci).border = border_outer(pos)
+
+def apply_table_outer_border(ws, top_row, bottom_row, left_col, right_col):
+    med = Side(style="medium", color=NAVY)
+    for r in range(top_row, bottom_row + 1):
+        for c in range(left_col, right_col + 1):
+            cell = ws.cell(r, c)
+            ex = cell.border
+            cell.border = Border(
+                left=med   if c == left_col   else ex.left,
+                right=med  if c == right_col  else ex.right,
+                top=med    if r == top_row    else ex.top,
+                bottom=med if r == bottom_row else ex.bottom,
+            )
+
 def align(h="left", v="center", wrap=False):
     return Alignment(horizontal=h, vertical=v, wrap_text=wrap)
 
@@ -93,7 +118,8 @@ def build_workbook(data):
     ws.row_dimensions[5].height = 18; ws.row_dimensions[6].height = 22; ws.row_dimensions[7].height = 44
     ws.merge_cells("A5:F5")
     ws["A5"].value = "KEY METRICS"
-    apply(ws["A5"], font(bold=True, color="7A5200", size=11), fill(GOLD), border("medium"), align("left", "center"))
+    apply(ws["A5"], font(bold=True, color="7A5200", size=11), fill(GOLD), None, align("left", "center"))
+    apply_merged_border(ws, 5)
 
     kpi_labels = ["Meetings This Month", "Pitches in Flight", "Overdue Follow-ups",
                   "Tier 1 Gone Cold (60d+)", "Portcos Exploring Exit", "Pitch Win Rate"]
@@ -120,20 +146,24 @@ def build_workbook(data):
     ws.row_dimensions[9].height = 20
     ws.merge_cells("A9:F9")
     ws["A9"].value = "ACTIVITY BREAKDOWN"
-    apply(ws["A9"], font(bold=True, color="7A5200", size=11), fill(GOLD), border("medium"), align("left", "center"))
+    apply(ws["A9"], font(bold=True, color="7A5200", size=11), fill(GOLD), None, align("left", "center"))
+    apply_merged_border(ws, 9)
 
     act_hdr = 10
     ws.row_dimensions[act_hdr].height = 20
     for ci, txt in enumerate(["Type", "Count", "", "Firm", "Touchpoints", ""], 1):
         c = ws.cell(act_hdr, ci); c.value = txt or None
-        if txt: apply(c, font(bold=True, color=WHITE, size=10), fill(NAVY_MID), border("medium"), align("left", "center"))
-        else:   apply(c, fll=fill(NAVY_XPAL), brd=border())
+        if ci in (1, 2, 4, 5):
+            apply(c, font(bold=True, color=WHITE, size=10), fill(NAVY_MID), border("medium"), align("left", "center"))
+        else:
+            c.fill = fill(WHITE); c.border = Border()
 
     act_types  = ["Meeting", "Pitch", "Conference", "Call"]
     firm_names = sorted(set(a.get("firm", "") for a in activities if a.get("firm")),
                         key=lambda f: sum(1 for a in activities if a.get("firm") == f), reverse=True)[:8]
+    nrows_act = max(len(act_types), len(firm_names))
 
-    for i in range(max(len(act_types), len(firm_names))):
+    for i in range(nrows_act):
         r = act_hdr + 1 + i
         ws.row_dimensions[r].height = 18
         fll_u = fill(NAVY_PALE) if i % 2 == 0 else fill(NAVY_XPAL)
@@ -144,16 +174,19 @@ def build_workbook(data):
         if t:
             ws.cell(r, 2).value = f"=COUNTIF('Activity Log'!B2:B{n_act+1},\"{t}\")"
         apply(ws.cell(r, 2), font(color=TEXT_DARK), fll_u, border(), align("center", "center"))
-        apply(ws.cell(r, 3), fll=fll_u, brd=border())
+        ws.cell(r, 3).value = None; ws.cell(r, 3).fill = fill(WHITE); ws.cell(r, 3).border = Border()
         ws.cell(r, 4).value = firm
         apply(ws.cell(r, 4), font(bold=bool(firm), color=TEXT_DARK), fll_u, border(), align("left", "center"))
         if firm:
             ws.cell(r, 5).value = f"=COUNTIF('Activity Log'!C2:C{n_act+1},\"{firm}\")"
         apply(ws.cell(r, 5), font(color=TEXT_DARK), fll_u, border(), align("center", "center"))
-        apply(ws.cell(r, 6), fll=fll_u, brd=border())
+        ws.cell(r, 6).value = None; ws.cell(r, 6).fill = fill(WHITE); ws.cell(r, 6).border = Border()
+
+    act_last = act_hdr + nrows_act
+    apply_table_outer_border(ws, act_hdr, act_last, 1, 2)
+    apply_table_outer_border(ws, act_hdr, act_last, 4, 5)
 
     # DEAL PIPELINE
-    nrows_act = max(len(act_types), len(firm_names))
     spc_r = act_hdr + 1 + nrows_act
     ws.row_dimensions[spc_r].height = 8
     for ci in range(1, 7): apply(ws.cell(spc_r, ci), fll=fill(NAVY_XPAL))
@@ -162,7 +195,8 @@ def build_workbook(data):
     ws.row_dimensions[deal_sec].height = 20
     ws.merge_cells(f"A{deal_sec}:F{deal_sec}")
     ws.cell(deal_sec, 1).value = "DEAL PIPELINE"
-    apply(ws.cell(deal_sec, 1), font(bold=True, color="7A5200", size=11), fill(GOLD), border("medium"), align("left", "center"))
+    apply(ws.cell(deal_sec, 1), font(bold=True, color="7A5200", size=11), fill(GOLD), None, align("left", "center"))
+    apply_merged_border(ws, deal_sec)
 
     deal_hdr = deal_sec + 1
     ws.row_dimensions[deal_hdr].height = 20
@@ -190,7 +224,8 @@ def build_workbook(data):
     ws.row_dimensions[exit_sec].height = 20
     ws.merge_cells(f"A{exit_sec}:F{exit_sec}")
     ws.cell(exit_sec, 1).value = "PORTCOS EXPLORING EXIT"
-    apply(ws.cell(exit_sec, 1), font(bold=True, color="7A5200", size=11), fill(GOLD), border("medium"), align("left", "center"))
+    apply(ws.cell(exit_sec, 1), font(bold=True, color="7A5200", size=11), fill(GOLD), None, align("left", "center"))
+    apply_merged_border(ws, exit_sec)
 
     exit_hdr = exit_sec + 1
     ws.row_dimensions[exit_hdr].height = 20
