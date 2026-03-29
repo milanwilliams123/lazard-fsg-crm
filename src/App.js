@@ -607,7 +607,14 @@ function AppInner() {
   const getSponsor = id => sponsors.find(s => s.id === id);
   const getContact = id => contacts.find(c => c.id === id);
   const getBanker = id => bankers.find(b => b.id === id);
-  const spActs = id => activities.filter(a => a.sponsorId === id).sort((a, b) => new Date(b.date) - new Date(a.date));
+  const buySideDeals = id => deals.filter(d => (d.buySideFirms || []).includes(id));
+  const spActs = id => {
+    const direct = activities.filter(a => a.sponsorId === id);
+    const buySideActIds = new Set(direct.map(a => a.id));
+    const buySideDealIds = new Set(buySideDeals(id).map(d => d.id));
+    const indirect = activities.filter(a => a.dealId && buySideDealIds.has(a.dealId) && !buySideActIds.has(a.id));
+    return [...direct, ...indirect].sort((a, b) => new Date(b.date) - new Date(a.date));
+  };
   const ctActs = id => activities.filter(a => a.contactId === id).sort((a, b) => new Date(b.date) - new Date(a.date));
   const spCts = id => contacts.filter(c => c.sponsorId === id);
   const ltSp = id => { const a = spActs(id); return a.length ? a[0].date : null; };
@@ -915,11 +922,19 @@ function AppInner() {
         <div className="ptit">Activity ({acts.length})</div>
         {acts.length === 0 ? <div className="empty">No activities logged.</div> : acts.map(a => {
           const ct = getContact(a.contactId); const bk = getBanker(a.lazardBankerId); const pc = getPortco(a.portcoId);
+          const isBuySideAct = a.sponsorId !== sponsor.id && a.dealId && buySideDeals(sponsor.id).some(d => d.id === a.dealId);
+          const linkedDealName = isBuySideAct ? deals.find(d => d.id === a.dealId)?.name : null;
           return (
             <div key={a.id} className="arow" onClick={() => setActDetail(a)}>
               <div style={{ flex: 1 }}>
-                <div className="at">{a.type} — {a.date}{ct && <span style={{ color: "#aaa", fontWeight: 400 }}> with {ct.name}</span>}{pc && <span style={{ color: "#7a4a1a", fontWeight: 500 }}> · {pc.name}</span>}</div>
+                <div className="at" style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                  <span>{a.type} — {a.date}</span>
+                  {ct && <span style={{ color: "#aaa", fontWeight: 400 }}>with {ct.name}</span>}
+                  {pc && <span style={{ color: "#7a4a1a", fontWeight: 500 }}>· {pc.name}</span>}
+                  {isBuySideAct && <span style={{ background: "#EEF7F2", color: "#1d5c3a", borderRadius: 2, fontSize: 9, padding: "1px 6px", fontWeight: 700 }}>Buy-Side Pitched</span>}
+                </div>
                 <div className="am">{a.description}</div>
+                {linkedDealName && <div style={{ fontSize: 10, color: "#1a3a5c", marginTop: 2 }}>Deal: {linkedDealName}</div>}
                 {bk && <div style={{ fontSize: 10, color: "#bbb", marginTop: 2 }}>Lazard: {bk.name}</div>}
                 {a.nextAction && <div style={{ fontSize: 11, color: "#1a3a5c", marginTop: 4, fontWeight: 500 }}>→ {a.nextAction}</div>}
               </div>
