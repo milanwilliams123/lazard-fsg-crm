@@ -874,6 +874,44 @@ function AppInner() {
           );
         })()}
         <div className="divider" />
+        {/* LINKED DEALS */}
+        {(() => {
+          const sellDeals = deals.filter(d => d.sellerSponsorId === sponsor.id);
+          const buyDeals  = deals.filter(d => (d.buySideFirms || []).includes(sponsor.id));
+          const allLinked = [...sellDeals, ...buyDeals];
+          if (allLinked.length === 0) return null;
+          const DS = DEAL_STATUS_STYLE;
+          return (
+            <>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                <div className="ptit" style={{ marginBottom: 0 }}>Linked Deals ({allLinked.length})</div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 22 }}>
+                {allLinked.map(d => {
+                  const pc = getPortco(d.portcoId);
+                  const ds = DS[d.status] || { bg: "#f0f0f0", text: "#888" };
+                  const isBuySide = (d.buySideFirms || []).includes(sponsor.id);
+                  const roleColor = isBuySide ? { bg: "#EEF7F2", text: "#1d5c3a" } : { bg: "#EEF2F7", text: "#1a3a5c" };
+                  const roleLabel = isBuySide ? "Buy-Side Pitched" : d.lazardRole;
+                  return (
+                    <div key={d.id} onClick={() => setDealModal(d.id)}
+                      style={{ background: "#fafafa", border: "1px solid #eee", borderRadius: 3, padding: "12px 16px", cursor: "pointer", transition: "border-color .15s" }}
+                      onMouseEnter={e => e.currentTarget.style.borderColor = "#1a3a5c"}
+                      onMouseLeave={e => e.currentTarget.style.borderColor = "#eee"}>
+                      <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 4 }}>
+                        <div style={{ fontSize: 13, fontFamily: "Cormorant Garamond, serif", fontWeight: 700, color: "#1a3a5c" }}>{d.name}</div>
+                        <span style={{ background: roleColor.bg, color: roleColor.text, borderRadius: 2, fontSize: 9, padding: "2px 7px", fontWeight: 700 }}>{roleLabel}</span>
+                        <span style={{ background: ds.bg, color: ds.text, borderRadius: 2, fontSize: 9, padding: "2px 7px", fontWeight: 600 }}>{d.status}</span>
+                      </div>
+                      <div style={{ fontSize: 11, color: "#aaa" }}>{d.date}{pc && <span style={{ color: "#7a4a1a" }}> · {pc.name}</span>}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          );
+        })()}
+        <div className="divider" />
         <div className="ptit">Activity ({acts.length})</div>
         {acts.length === 0 ? <div className="empty">No activities logged.</div> : acts.map(a => {
           const ct = getContact(a.contactId); const bk = getBanker(a.lazardBankerId); const pc = getPortco(a.portcoId);
