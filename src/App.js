@@ -519,7 +519,59 @@ function BankerEditForm({ initial, onSave, onClose }) {
 export default function App() {
   const windowWidth = useWindowWidth();
   const isMobile = windowWidth < 768;
-  const [tab, setTab] = useState("dashboard");
+
+  const [unlocked, setUnlocked] = useState(
+    sessionStorage.getItem("fsg_auth") === "Milan_Associate_Interview"
+  );
+  const [pwInput, setPwInput] = useState("");
+  const [pwError, setPwError] = useState(false);
+
+  if (!unlocked) {
+    return (
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh", background:"#0f2744" }}>
+        <div style={{ background:"#fff", padding: isMobile ? "32px 24px" : "48px 40px", width: isMobile ? "90%" : 360, boxShadow:"0 12px 40px rgba(0,0,0,0.2)" }}>
+          <div style={{ fontFamily:"Cormorant Garamond,Georgia,serif", fontSize:22, color:"#0f2744", fontWeight:700, marginBottom:4 }}>Lazard</div>
+          <div style={{ fontSize:10, color:"#aaa", letterSpacing:"0.14em", textTransform:"uppercase", marginBottom:32 }}>Financial Sponsors Group</div>
+          <input
+            type="password"
+            placeholder="Password"
+            value={pwInput}
+            onChange={e => { setPwInput(e.target.value); setPwError(false); }}
+            onKeyDown={e => {
+              if (e.key === "Enter") {
+                if (pwInput === "Milan_Associate_Interview") {
+                  sessionStorage.setItem("fsg_auth", "Milan_Associate_Interview");
+                  setUnlocked(true);
+                } else {
+                  setPwError(true);
+                  setPwInput("");
+                }
+              }
+            }}
+            style={{ width:"100%", padding:"10px 12px", border: pwError ? "1px solid #c0392b" : "1px solid #ddd", fontSize:13, outline:"none", fontFamily:"inherit", marginBottom:8 }}
+            autoFocus
+          />
+          {pwError && <div style={{ fontSize:11, color:"#c0392b", marginBottom:8 }}>Incorrect password</div>}
+          <button
+            onClick={() => {
+              if (pwInput === "Milan_Associate_Interview") {
+                sessionStorage.setItem("fsg_auth", "Milan_Associate_Interview");
+                setUnlocked(true);
+              } else {
+                setPwError(true);
+                setPwInput("");
+              }
+            }}
+            style={{ width:"100%", background:"#0f2744", border:"none", color:"#fff", padding:"11px", fontSize:12, fontFamily:"inherit", fontWeight:600, cursor:"pointer", letterSpacing:"0.04em" }}
+          >
+            Enter
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+
   const [sponsors, setSponsors] = useState(SPONSORS_SEED);
   const [contacts, setContacts] = useState(CONTACTS_SEED);
   const [bankers, setBankers] = useState(LAZARD_BANKERS_SEED);
