@@ -256,7 +256,7 @@
 
   .feature-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 0;
     border: 1px solid var(--rule);
     margin-top: 60px;
@@ -266,13 +266,15 @@
     padding: 40px 36px;
     border-right: 1px solid var(--rule);
     border-bottom: 1px solid var(--rule);
+    grid-column: span 2;
     position: relative;
     transition: background 0.2s;
   }
 
   .feature-card:hover { background: #faf8f4; }
   .feature-card:nth-child(3n) { border-right: none; }
-  .feature-card:nth-child(n+7) { border-bottom: none; }
+  .feature-card:nth-last-child(2) { grid-column: 2 / span 2; border-bottom: none; }
+  .feature-card:nth-last-child(1) { grid-column: 4 / span 2; border-right: none; border-bottom: none; }
 
   .feature-icon {
     width: 40px;
@@ -590,16 +592,16 @@
   .screen-bullets li {
     font-size: 13px;
     color: var(--muted);
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
+    padding-left: 18px;
+    position: relative;
   }
 
   .screen-bullets li::before {
     content: '—';
     color: var(--gold-dim);
-    flex-shrink: 0;
-    margin-top: 1px;
+    position: absolute;
+    left: 0;
+    top: 0;
   }
 
   /* ── TECH ── */
@@ -781,9 +783,12 @@
     .hero { padding: 60px 0 80px; }
     .header-stats { grid-template-columns: repeat(2, 1fr); }
     section, .features-inner, .how-inner, .screens-inner, .tech-inner, .closer-inner { padding: 60px 28px; }
-    .feature-grid { grid-template-columns: 1fr 1fr; }
-    .feature-card:nth-child(2n) { border-right: none; }
+    .feature-grid { grid-template-columns: repeat(4, 1fr); }
+    .feature-card { grid-column: span 2; }
     .feature-card:nth-child(3n) { border-right: 1px solid var(--rule); }
+    .feature-card:nth-child(2n) { border-right: none; }
+    .feature-card:nth-last-child(2) { grid-column: span 2; border-bottom: none; }
+    .feature-card:nth-last-child(1) { grid-column: span 2; border-right: none; border-bottom: none; }
     .flow { grid-template-columns: 1fr 1fr; gap: 40px; }
     .flow::after { display: none; }
     .screen-item, .screen-item.reverse { grid-template-columns: 1fr; direction: ltr; }
@@ -793,8 +798,8 @@
   }
 
   @media (max-width: 600px) {
-    .feature-grid { grid-template-columns: 1fr; }
-    .feature-card:nth-child(n) { border-right: none; }
+    .feature-grid { grid-template-columns: repeat(2, 1fr); }
+    .feature-card { grid-column: span 1 !important; border-right: none; border-bottom: 1px solid var(--rule); }
     .flow { grid-template-columns: 1fr; }
     .header-stats { grid-template-columns: 1fr 1fr; }
     .hero-title { font-size: 42px; }
@@ -816,7 +821,7 @@
     <div class="hero">
       <div class="hero-eyebrow">Work Product · Associate Interview</div>
       <h1 class="hero-title">FSG Coverage<br><em>Intelligence</em></h1>
-      <p class="hero-sub">A purpose-built CRM for the Financial Sponsors Group — managing sponsor firm relationships, tracking deal mandates, and surfacing the coverage intelligence that drives mandate wins.</p>
+      <p class="hero-sub">A CRM built for the Financial Sponsors Group to manage sponsor relationships, track deal mandates, and stay on top of coverage across the firm universe.</p>
       <a href="https://lazard-fsg-crm.vercel.app" target="_blank" class="hero-cta">
         Open the CRM
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -882,7 +887,7 @@
       <div class="feature-card">
         <div class="feature-icon">⊞</div>
         <div class="feature-name">Export</div>
-        <div class="feature-desc">Select which datasets to include using the checkboxes, then click Download. The output is a formatted .xlsx workbook — Dashboard tab with live COUNTIF formulas, plus separate tabs for Activity Log, Deals, Portfolio Companies, and Lazard Team. Formatted in Lazard navy and gold.</div>
+        <div class="feature-desc">Select which datasets to include using the checkboxes, then click Download. The output is a formatted .xlsx workbook — Dashboard tab with live COUNTIF formulas pulling from the data sheets, plus separate tabs for Activity Log, Deals, Portfolio Companies, and Lazard Team.</div>
       </div>
 
     </div>
@@ -944,10 +949,10 @@
           <div class="screen-name">Check what needs attention today</div>
           <div class="screen-desc">Open the CRM and the Dashboard gives you an immediate read on the state of coverage. The five tiles at the top are your daily priorities — click any one to expand the detail panel below.</div>
           <ul class="screen-bullets">
-            <li><strong>Tier 1 Gone Cold</strong> — click to see which Tier 1 firms are overdue for a touchpoint and jump straight to their firm page</li>
-            <li><strong>Pitches in Flight</strong> — click to see all active pitches with next actions listed</li>
-            <li><strong>Overdue Follow-ups</strong> — any logged activity where the next action date has passed</li>
-            <li><strong>Portcos Exploring Exit</strong> — click through to the portco and its linked deal</li>
+            <li>Click <strong>Tier 1 Gone Cold</strong> to see which firms are overdue and jump straight to their page</li>
+            <li>Click <strong>Pitches in Flight</strong> to see all active pitches with next actions listed</li>
+            <li>Click <strong>Overdue Follow-ups</strong> for any activity where a next action has passed</li>
+            <li>Click <strong>Portcos Exploring Exit</strong> to navigate directly to the portco and its linked deal</li>
           </ul>
         </div>
       </div>
@@ -1072,7 +1077,7 @@
   <div class="closer-inner">
     <div class="reveal">
       <h2 class="closer-title">Built for<br><em>Lazard FSG</em></h2>
-      <p class="closer-sub">A functional work product designed around how the sponsor coverage team actually operates — from first cold call to mandate close.</p>
+      <p class="closer-sub">Open the CRM to explore, or view the source on GitHub.</p>
     </div>
     <div class="cta-group reveal">
       <a href="https://lazard-fsg-crm.vercel.app" target="_blank" class="btn-primary">
