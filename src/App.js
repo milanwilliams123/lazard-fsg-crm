@@ -516,15 +516,23 @@ function BankerEditForm({ initial, onSave, onClose }) {
 }
 
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
-export default function App() {
-  const windowWidth = useWindowWidth();
-  const isMobile = windowWidth < 768;
-
+function PasswordGate({ children }) {
+  const isMobile = window.innerWidth < 768;
   const [unlocked, setUnlocked] = useState(
     sessionStorage.getItem("fsg_auth") === "Milan_Associate_Interview"
   );
   const [pwInput, setPwInput] = useState("");
   const [pwError, setPwError] = useState(false);
+
+  const tryUnlock = (val) => {
+    if (val === "Milan_Associate_Interview") {
+      sessionStorage.setItem("fsg_auth", "Milan_Associate_Interview");
+      setUnlocked(true);
+    } else {
+      setPwError(true);
+      setPwInput("");
+    }
+  };
 
   if (!unlocked) {
     return (
@@ -537,31 +545,13 @@ export default function App() {
             placeholder="Password"
             value={pwInput}
             onChange={e => { setPwInput(e.target.value); setPwError(false); }}
-            onKeyDown={e => {
-              if (e.key === "Enter") {
-                if (pwInput === "Milan_Associate_Interview") {
-                  sessionStorage.setItem("fsg_auth", "Milan_Associate_Interview");
-                  setUnlocked(true);
-                } else {
-                  setPwError(true);
-                  setPwInput("");
-                }
-              }
-            }}
+            onKeyDown={e => { if (e.key === "Enter") tryUnlock(e.target.value); }}
             style={{ width:"100%", padding:"10px 12px", border: pwError ? "1px solid #c0392b" : "1px solid #ddd", fontSize:13, outline:"none", fontFamily:"inherit", marginBottom:8 }}
             autoFocus
           />
           {pwError && <div style={{ fontSize:11, color:"#c0392b", marginBottom:8 }}>Incorrect password</div>}
           <button
-            onClick={() => {
-              if (pwInput === "Milan_Associate_Interview") {
-                sessionStorage.setItem("fsg_auth", "Milan_Associate_Interview");
-                setUnlocked(true);
-              } else {
-                setPwError(true);
-                setPwInput("");
-              }
-            }}
+            onClick={() => tryUnlock(pwInput)}
             style={{ width:"100%", background:"#0f2744", border:"none", color:"#fff", padding:"11px", fontSize:12, fontFamily:"inherit", fontWeight:600, cursor:"pointer", letterSpacing:"0.04em" }}
           >
             Enter
@@ -571,7 +561,17 @@ export default function App() {
     );
   }
 
+  return children;
+}
 
+export default function App() {
+  return <PasswordGate><AppInner /></PasswordGate>;
+}
+
+function AppInner() {
+  const windowWidth = useWindowWidth();
+  const isMobile = windowWidth < 768;
+  const [tab, setTab] = useState("dashboard");
   const [sponsors, setSponsors] = useState(SPONSORS_SEED);
   const [contacts, setContacts] = useState(CONTACTS_SEED);
   const [bankers, setBankers] = useState(LAZARD_BANKERS_SEED);
