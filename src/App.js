@@ -1,4 +1,14 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+
+function useWindowWidth() {
+  const [w, setW] = useState(window.innerWidth);
+  useEffect(() => {
+    const fn = () => setW(window.innerWidth);
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+  return w;
+}
 
 // ─── SEED DATA ────────────────────────────────────────────────────────────────
 const LAZARD_BANKERS_SEED = [
@@ -33,7 +43,7 @@ const LAZARD_BANKERS_SEED = [
   { id: "lb22", name: "Courtney Haydon", title: "Managing Director", sector: "Sponsor Coverage", sponsorCoverage: true, sponsorFirms: ["sp2","sp3","sp7","sp8","sp11"], email: "chaydon@lazard.com", phone: "+1 212 632 6122" },
   { id: "lb23", name: "Adam Cady", title: "Managing Director", sector: "Sponsor Coverage", sponsorCoverage: true, sponsorFirms: ["sp4","sp5","sp7","sp9","sp11"], email: "acady@lazard.com", phone: "+1 212 632 6123" },
   { id: "lb24", name: "Teddy Henderson", title: "Director", sector: "Sponsor Coverage", sponsorCoverage: true, sponsorFirms: ["sp1","sp2","sp6","sp8","sp10"], email: "thenderson@lazard.com", phone: "+1 212 632 6124" },
-  { id: "lb25", name: "Daniel Gajewski", title: "Vice President", sector: "Sponsor Coverage", sponsorCoverage: true, sponsorFirms: ["sp13","sp14","sp15","sp16","sp17"], email: "dgajewski@lazard.com", phone: "+1 212 632 6125" },
+  { id: "lb25", name: "Daniel Gajewski", title: "Managing Director", sector: "Sponsor Coverage", sponsorCoverage: true, sponsorFirms: ["sp13","sp14","sp15","sp16","sp17"], email: "dgajewski@lazard.com", phone: "+1 212 632 6125" },
 ];
 
 const SPONSORS_SEED = [
@@ -284,14 +294,15 @@ const CancelBtn = { background: "#f5f5f5", border: "1px solid #e0e0e0", borderRa
 const DangerBtn = { background: "#FDF0EE", border: "1px solid #f0c0b8", borderRadius: 3, color: "#7a1a1a", fontFamily: "inherit", fontSize: 12, padding: "9px 16px", cursor: "pointer" };
 
 function Modal({ title, onClose, children, width = 640 }) {
+  const isMob = window.innerWidth < 768;
   return (
-    <div style={{ position: "fixed", inset: 0, background: "#00000040", zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={onClose}>
-      <div style={{ background: "#fff", borderRadius: 4, width, maxWidth: "95vw", maxHeight: "88vh", overflowY: "auto", boxShadow: "0 12px 48px rgba(26,58,92,0.15)" }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 24px", borderBottom: "1px solid #eee" }}>
-          <div style={{ fontFamily: "Georgia,serif", fontSize: 16, color: "#1a3a5c", fontWeight: 700 }}>{title}</div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "#bbb", fontSize: 20, cursor: "pointer" }}>✕</button>
+    <div style={{ position: "fixed", inset: 0, background: "#00000040", zIndex: 300, display: "flex", alignItems: isMob ? "flex-end" : "center", justifyContent: "center" }} onClick={onClose}>
+      <div style={{ background: "#fff", borderRadius: isMob ? "12px 12px 0 0" : 4, width: isMob ? "100%" : width, maxWidth: "100vw", maxHeight: isMob ? "92vh" : "88vh", overflowY: "auto", boxShadow: "0 12px 48px rgba(26,58,92,0.15)" }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 20px", borderBottom: "1px solid #eee", position: "sticky", top: 0, background: "#fff", zIndex: 1 }}>
+          <div style={{ fontFamily: "Georgia,serif", fontSize: 15, color: "#1a3a5c", fontWeight: 700 }}>{title}</div>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "#bbb", fontSize: 20, cursor: "pointer", padding: "0 4px" }}>✕</button>
         </div>
-        <div style={{ padding: 24 }}>{children}</div>
+        <div style={{ padding: isMob ? 16 : 24 }}>{children}</div>
       </div>
     </div>
   );
@@ -463,6 +474,8 @@ function BankerEditForm({ initial, onSave, onClose }) {
 
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 export default function App() {
+  const windowWidth = useWindowWidth();
+  const isMobile = windowWidth < 768;
   const [tab, setTab] = useState("dashboard");
   const [sponsors, setSponsors] = useState(SPONSORS_SEED);
   const [contacts, setContacts] = useState(CONTACTS_SEED);
@@ -601,6 +614,25 @@ export default function App() {
     .cc:hover{border-color:#1a3a5c}
     .mpill{background:#EEF2F7;border:1px solid #C5D4E6;border-radius:2px;padding:3px 9px;font-size:10px;color:#1a3a5c;display:inline-flex;align-items:center;gap:3px;font-weight:500;margin-right:3px}
     .divider{height:1px;background:#f0f0f0;margin:18px 0}
+    @media(max-width:767px){
+      .hdr{padding:0 16px;height:52px}
+      .lsub{display:none}
+      .nav{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+      .nav::-webkit-scrollbar{display:none}
+      .nb{padding:0 10px;font-size:9px;height:52px;white-space:nowrap}
+      .main{padding:16px}
+      .pghdr{flex-direction:column;gap:10px;margin-bottom:16px}
+      .pgtit{font-size:20px}
+      .stats{grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
+      .stat{padding:12px 14px}
+      .sv{font-size:24px}
+      .twocol{grid-template-columns:1fr;gap:12px}
+      .tbl{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+      .fp{padding:16px}
+      .igrid{grid-template-columns:repeat(2,1fr)}
+      .tb{gap:6px}
+      .si{width:100%}
+    }
   `;
 
   // ─── FIRM PAGE ──────────────────────────────────────────────────────────
@@ -615,19 +647,18 @@ export default function App() {
     return (
       <div className="fp">
         <button className="backbtn" onClick={() => setFirmPage(null)}>← Back to Firms</button>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20, flexWrap: isMobile ? "wrap" : "nowrap", gap: isMobile ? 12 : 0 }}>
           <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-            <div style={{ width: 52, height: 52, background: "#1a3a5c", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontFamily: "Cormorant Garamond, serif", fontSize: 24, fontWeight: 700, borderRadius: 3 }}>{sponsor.name[0]}</div>
+            <div style={{ width: 46, height: 46, background: "#1a3a5c", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontFamily: "Cormorant Garamond, serif", fontSize: 22, fontWeight: 700, borderRadius: 3, flexShrink: 0 }}>{sponsor.name[0]}</div>
             <div>
-              <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 28, color: "#1a3a5c", fontWeight: 700 }}>{sponsor.name}</div>
-              <div style={{ fontSize: 11, color: "#aaa", marginTop: 2 }}>{sponsor.hq} · {sponsor.website}</div>
-              <div style={{ marginTop: 5 }}>{sponsor.sectors.map(s => <SectorTag key={s} sector={s} />)}</div>
+              <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: isMobile ? 22 : 28, color: "#1a3a5c", fontWeight: 700 }}>{sponsor.name}</div>
+              <div style={{ fontSize: 11, color: "#aaa", marginTop: 2 }}>{sponsor.hq}{!isMobile && ` · ${sponsor.website}`}</div>
+              <div style={{ marginTop: 5 }}>{sponsor.sectors.slice(0, isMobile ? 2 : 99).map(s => <SectorTag key={s} sector={s} />)}</div>
             </div>
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button style={SaveBtn} className="abtn" onClick={() => setAddActivity(true)}>+ Log Activity</button>
-            <button style={CancelBtn} onClick={() => setEditSponsorD(sponsor)}>Edit</button>
-            <button style={DangerBtn} onClick={() => delSponsor(sponsor.id)}>Delete</button>
+          <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+            <button className="abtn" onClick={() => setAddActivity(true)}>+ Log Activity</button>
+            {!isMobile && <><button style={CancelBtn} onClick={() => setEditSponsorD(sponsor)}>Edit</button><button style={DangerBtn} onClick={() => delSponsor(sponsor.id)}>Delete</button></>}
           </div>
         </div>
         {lt && daysSince(lt) > 45 && <div style={{ background: "#FDF0EE", border: "1px solid #f0c0b8", borderRadius: 3, padding: "10px 14px", marginBottom: 16, fontSize: 12, color: "#7a1a1a" }}>⚠ Coverage stale — last touchpoint {daysSince(lt)} days ago</div>}
@@ -708,7 +739,7 @@ export default function App() {
                 <button className="abtn" style={{ fontSize: 10, padding: "5px 12px" }} onClick={() => setAddPortcoOpen(true)}>+ Add</button>
               </div>
               {pcs.length === 0 ? <div className="empty" style={{ marginBottom: 16 }}>No portfolio companies added yet.</div> : (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 10, marginBottom: 22 }}>
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill,minmax(260px,1fr))", gap: 10, marginBottom: 22 }}>
                   {pcs.map(pc => {
                     const pStatus = PORTCO_STATUS_STYLE[pc.status] || { bg: "#f0f0f0", text: "#888" };
                     const pcActs = portcoActs(pc.id);
@@ -776,19 +807,18 @@ export default function App() {
     return (
       <div className="fp">
         <button className="backbtn" onClick={() => setContactPage(null)}>← Back</button>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20, flexWrap: isMobile ? "wrap" : "nowrap", gap: isMobile ? 12 : 0 }}>
           <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
-            <Avatar name={contact.name} size={52} />
+            <Avatar name={contact.name} size={isMobile ? 40 : 52} />
             <div>
-              <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 26, color: "#1a3a5c", fontWeight: 700 }}>{contact.name}</div>
+              <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: isMobile ? 20 : 26, color: "#1a3a5c", fontWeight: 700 }}>{contact.name}</div>
               <div style={{ fontSize: 11, color: "#aaa", marginTop: 2 }}>{contact.title} · {sp?.name}</div>
               <div style={{ marginTop: 5 }}><SectorTag sector={contact.sector} /></div>
             </div>
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
             <button className="abtn" onClick={() => setAddActivity(true)}>+ Log Activity</button>
-            <button style={CancelBtn} onClick={() => setEditContactD(contact)}>Edit</button>
-            <button style={DangerBtn} onClick={() => delContact(contact.id)}>Delete</button>
+            {!isMobile && <><button style={CancelBtn} onClick={() => setEditContactD(contact)}>Edit</button><button style={DangerBtn} onClick={() => delContact(contact.id)}>Delete</button></>}
           </div>
         </div>
         <div className="igrid">
@@ -1134,19 +1164,18 @@ export default function App() {
     return (
       <div className="fp">
         <button className="backbtn" onClick={() => setBankerPage(null)}>← Back to Team</button>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:20 }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:20, flexWrap: isMobile ? "wrap" : "nowrap", gap: isMobile ? 12 : 0 }}>
           <div style={{ display:"flex", gap:14, alignItems:"center" }}>
-            <Avatar name={b.name} size={52} />
+            <Avatar name={b.name} size={isMobile ? 40 : 52} />
             <div>
-              <div style={{ fontFamily:"Cormorant Garamond,serif", fontSize:26, color:"#1a3a5c", fontWeight:700 }}>{b.name}</div>
+              <div style={{ fontFamily:"Cormorant Garamond,serif", fontSize: isMobile ? 20 : 26, color:"#1a3a5c", fontWeight:700 }}>{b.name}</div>
               <div style={{ fontSize:11, color:"#aaa", marginTop:2 }}>{b.title} · Lazard</div>
               <div style={{ marginTop:5 }}><BankerTag banker={b} /></div>
             </div>
           </div>
-          <div style={{ display:"flex", gap:8 }}>
+          <div style={{ display:"flex", gap:8, flexShrink:0 }}>
             <button className="abtn" onClick={() => setAddActivity(true)}>+ Log Activity</button>
-            <button style={CancelBtn} onClick={() => setEditBankerD(b)}>Edit</button>
-            <button style={DangerBtn} onClick={() => delBanker(b.id)}>Delete</button>
+            {!isMobile && <><button style={CancelBtn} onClick={() => setEditBankerD(b)}>Edit</button><button style={DangerBtn} onClick={() => delBanker(b.id)}>Delete</button></>}
           </div>
         </div>
         <div className="igrid">
@@ -1813,13 +1842,34 @@ export default function App() {
             <div className="pghdr"><div><div className="pgtit">PE Firm Universe</div><div className="pgsub">{sponsors.length} Firms Tracked</div></div><button className="abtn" onClick={() => setAddSponsor(true)}>+ Add Firm</button></div>
             <div className="tb">
               <input className="si" placeholder="Search firms..." value={search} onChange={e => setSearch(e.target.value)} />
-              {["All","1","2","3"].map(t => <button key={t} className={`fb ${tierF===t?"on":""}`} onClick={() => setTierF(t)}>{t==="All"?"All Tiers":`Tier ${t}`}</button>)}
-              {["All",...SECTORS].map(s => <button key={s} className={`fb ${secF===s?"on":""}`} onClick={() => setSecF(s)} style={{ fontSize: 9 }}>{s}</button>)}
+              {["All","1","2","3"].map(t => <button key={t} className={`fb ${tierF===t?"on":""}`} onClick={() => setTierF(t)}>{t==="All"?"All Tiers":`T${t}`}</button>)}
+              {!isMobile && ["All",...SECTORS].map(s => <button key={s} className={`fb ${secF===s?"on":""}`} onClick={() => setSecF(s)} style={{ fontSize: 9 }}>{s}</button>)}
             </div>
-            <table className="tbl">
-              <thead><tr><th>Tier</th><th>Firm</th><th>AUM</th><th>Deals YTD</th><th>Sectors</th><th>Contacts</th><th>Last Touch</th></tr></thead>
-              <tbody>{fSponsors.map(s => { const lt = ltSp(s.id); const nc = spCts(s.id).length; return <tr key={s.id} onClick={() => setFirmPage(s.id)}><td><span style={{ background: TIER_COLOR[s.tier]+"14", color: TIER_COLOR[s.tier], border:`1px solid ${TIER_COLOR[s.tier]}30`, borderRadius:"50%", display:"inline-flex", alignItems:"center", justifyContent:"center", width:22, height:22, fontSize:10, fontWeight:700 }}>{s.tier}</span></td><td><div className="sn">{s.name}</div><div style={{ fontSize:10, color:"#bbb", marginTop:1 }}>{s.hq}</div></td><td style={{ color:"#666" }}>{s.aum}</td><td style={{ color:"#1a3a5c", fontFamily:"Cormorant Garamond,serif", fontSize:17, fontWeight:600 }}>{s.dealsYTD}</td><td>{s.sectors.slice(0,2).map(sec => <SectorTag key={sec} sector={sec} />)}</td><td style={{ color: nc>0?"#1d5c3a":"#ccc" }}>{nc}</td><td>{lt ? <StallBadge date={lt} /> : <span style={{ color:"#ddd", fontSize:11 }}>Never</span>}</td></tr>; })}</tbody>
-            </table>
+            {isMobile ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {fSponsors.map(s => { const lt = ltSp(s.id); const nc = spCts(s.id).length; return (
+                  <div key={s.id} onClick={() => setFirmPage(s.id)} style={{ background: "#fff", border: "1px solid #eee", borderRadius: 3, padding: 14, boxShadow: "0 1px 4px rgba(0,0,0,0.03)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                      <div>
+                        <div className="sn">{s.name}</div>
+                        <div style={{ fontSize: 10, color: "#aaa", marginTop: 2 }}>{s.hq}</div>
+                      </div>
+                      <span style={{ background: TIER_COLOR[s.tier]+"14", color: TIER_COLOR[s.tier], border:`1px solid ${TIER_COLOR[s.tier]}30`, borderRadius:"50%", display:"inline-flex", alignItems:"center", justifyContent:"center", width:22, height:22, fontSize:10, fontWeight:700 }}>{s.tier}</span>
+                    </div>
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>{s.sectors.slice(0,2).map(sec => <SectorTag key={sec} sector={sec} />)}</div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div style={{ fontSize: 11, color: "#aaa" }}>{s.aum} · {nc} contacts</div>
+                      {lt ? <StallBadge date={lt} /> : <span style={{ color:"#ddd", fontSize:11 }}>Never touched</span>}
+                    </div>
+                  </div>
+                );})}
+              </div>
+            ) : (
+              <table className="tbl">
+                <thead><tr><th>Tier</th><th>Firm</th><th>AUM</th><th>Deals YTD</th><th>Sectors</th><th>Contacts</th><th>Last Touch</th></tr></thead>
+                <tbody>{fSponsors.map(s => { const lt = ltSp(s.id); const nc = spCts(s.id).length; return <tr key={s.id} onClick={() => setFirmPage(s.id)}><td><span style={{ background: TIER_COLOR[s.tier]+"14", color: TIER_COLOR[s.tier], border:`1px solid ${TIER_COLOR[s.tier]}30`, borderRadius:"50%", display:"inline-flex", alignItems:"center", justifyContent:"center", width:22, height:22, fontSize:10, fontWeight:700 }}>{s.tier}</span></td><td><div className="sn">{s.name}</div><div style={{ fontSize:10, color:"#bbb", marginTop:1 }}>{s.hq}</div></td><td style={{ color:"#666" }}>{s.aum}</td><td style={{ color:"#1a3a5c", fontFamily:"Cormorant Garamond,serif", fontSize:17, fontWeight:600 }}>{s.dealsYTD}</td><td>{s.sectors.slice(0,2).map(sec => <SectorTag key={sec} sector={sec} />)}</td><td style={{ color: nc>0?"#1d5c3a":"#ccc" }}>{nc}</td><td>{lt ? <StallBadge date={lt} /> : <span style={{ color:"#ddd", fontSize:11 }}>Never</span>}</td></tr>; })}</tbody>
+              </table>
+            )}
           </>
         )}
 
@@ -1829,12 +1879,33 @@ export default function App() {
             <div className="pghdr"><div><div className="pgtit">PE Contacts</div><div className="pgsub">{contacts.length} Contacts Across {sponsors.length} Firms</div></div><button className="abtn" onClick={() => setAddContact(true)}>+ Add Contact</button></div>
             <div className="tb">
               <input className="si" placeholder="Search contacts..." value={search} onChange={e => setSearch(e.target.value)} />
-              {["All",...SECTORS].map(s => <button key={s} className={`fb ${secF===s?"on":""}`} onClick={() => setSecF(s)} style={{ fontSize: 9 }}>{s}</button>)}
+              {!isMobile && ["All",...SECTORS].map(s => <button key={s} className={`fb ${secF===s?"on":""}`} onClick={() => setSecF(s)} style={{ fontSize: 9 }}>{s}</button>)}
             </div>
-            <table className="tbl">
-              <thead><tr><th>Contact</th><th>Firm</th><th>Sector</th><th>Lazard Coverage</th><th>Deals</th><th>Last Touched</th></tr></thead>
-              <tbody>{fContacts.map(c => { const sp = getSponsor(c.sponsorId); const mapped = (c.lazardMappings||[]).map(id=>getBanker(id)).filter(Boolean); return <tr key={c.id} onClick={() => setContactPage(c.id)}><td><div style={{ display:"flex", gap:8, alignItems:"center" }}><Avatar name={c.name} size={28} /><div><div className="sn" style={{ fontSize:13 }}>{c.name}</div><div style={{ fontSize:10, color:"#aaa" }}>{c.title}</div></div></div></td><td style={{ color:"#666", fontSize:12 }}>{sp?.name||"—"}</td><td><SectorTag sector={c.sector} /></td><td>{mapped.length>0 ? mapped.map(b=><span key={b.id} className="mpill" style={{ fontSize:10 }}>{b.name.split(" ")[0]}</span>) : <span style={{ color:"#ccc", fontSize:11 }}>Unmapped</span>}</td><td style={{ fontSize:11, color:"#aaa" }}>{c.recentDeals?.length||0}</td><td>{c.lastContacted ? <StallBadge date={c.lastContacted} /> : <span style={{ color:"#ddd", fontSize:11 }}>Never</span>}</td></tr>; })}</tbody>
-            </table>
+            {isMobile ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {fContacts.map(c => { const sp = getSponsor(c.sponsorId); const mapped = (c.lazardMappings||[]).map(id=>getBanker(id)).filter(Boolean); return (
+                  <div key={c.id} onClick={() => setContactPage(c.id)} style={{ background: "#fff", border: "1px solid #eee", borderRadius: 3, padding: 14, boxShadow: "0 1px 4px rgba(0,0,0,0.03)" }}>
+                    <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 8 }}>
+                      <Avatar name={c.name} size={36} />
+                      <div style={{ flex: 1 }}>
+                        <div className="sn" style={{ fontSize: 13 }}>{c.name}</div>
+                        <div style={{ fontSize: 10, color: "#aaa" }}>{c.title} · {sp?.name}</div>
+                      </div>
+                      {c.lastContacted ? <StallBadge date={c.lastContacted} /> : <span style={{ color:"#ddd", fontSize:10 }}>Never</span>}
+                    </div>
+                    <div style={{ display: "flex", gap: 5, flexWrap: "wrap", alignItems: "center" }}>
+                      <SectorTag sector={c.sector} />
+                      {mapped.slice(0,3).map(b => <span key={b.id} className="mpill" style={{ fontSize:9 }}>{b.name.split(" ")[0]}</span>)}
+                    </div>
+                  </div>
+                );})}
+              </div>
+            ) : (
+              <table className="tbl">
+                <thead><tr><th>Contact</th><th>Firm</th><th>Sector</th><th>Lazard Coverage</th><th>Deals</th><th>Last Touched</th></tr></thead>
+                <tbody>{fContacts.map(c => { const sp = getSponsor(c.sponsorId); const mapped = (c.lazardMappings||[]).map(id=>getBanker(id)).filter(Boolean); return <tr key={c.id} onClick={() => setContactPage(c.id)}><td><div style={{ display:"flex", gap:8, alignItems:"center" }}><Avatar name={c.name} size={28} /><div><div className="sn" style={{ fontSize:13 }}>{c.name}</div><div style={{ fontSize:10, color:"#aaa" }}>{c.title}</div></div></div></td><td style={{ color:"#666", fontSize:12 }}>{sp?.name||"—"}</td><td><SectorTag sector={c.sector} /></td><td>{mapped.length>0 ? mapped.map(b=><span key={b.id} className="mpill" style={{ fontSize:10 }}>{b.name.split(" ")[0]}</span>) : <span style={{ color:"#ccc", fontSize:11 }}>Unmapped</span>}</td><td style={{ fontSize:11, color:"#aaa" }}>{c.recentDeals?.length||0}</td><td>{c.lastContacted ? <StallBadge date={c.lastContacted} /> : <span style={{ color:"#ddd", fontSize:11 }}>Never</span>}</td></tr>; })}</tbody>
+              </table>
+            )}
           </>
         )}
 
@@ -1847,16 +1918,34 @@ export default function App() {
             <div className="pghdr"><div><div className="pgtit">Activity Log</div><div className="pgsub">All Touchpoints · Click to View Details</div></div><button className="abtn" onClick={() => setAddActivity(true)}>+ Log Activity</button></div>
             <div className="tb">
               <input className="si" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)} />
-              <select className="si" style={{ width: 160 }} value={firmF} onChange={e => setFirmF(e.target.value)}>
+              <select className="si" style={{ width: isMobile ? "100%" : 160 }} value={firmF} onChange={e => setFirmF(e.target.value)}>
                 <option value="All">All Firms</option>
                 {sponsors.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
               {["All","Meeting","Pitch","Conference","Call"].map(t => <button key={t} className={`fb ${typeF===t?"on":""}`} onClick={() => setTypeF(t)}>{t}</button>)}
             </div>
-            <table className="tbl">
-              <thead><tr><th>Date</th><th>Firm</th><th>Contact</th><th>Portco</th><th>Lazard Banker</th><th>Type</th><th>Description</th><th>Next Action</th><th>Status</th></tr></thead>
-              <tbody>{fActivities.filter(a => firmF === "All" || a.sponsorId === firmF).map(a => { const sp=getSponsor(a.sponsorId); const ct=getContact(a.contactId); const bk=getBanker(a.lazardBankerId); const pc=getPortco(a.portcoId); return <tr key={a.id} onClick={() => setActDetail(a)}><td style={{ color:"#aaa", fontSize:11, whiteSpace:"nowrap" }}>{a.date}</td><td><span className="sn" style={{ fontSize:12 }}>{sp?.name||"—"}</span></td><td style={{ color:"#666", fontSize:11 }}>{ct?.name||"—"}</td><td style={{ fontSize:11 }}>{pc ? <span style={{ background:"#FDF6EE", color:"#7a4a1a", borderRadius:2, fontSize:10, padding:"2px 7px", fontWeight:500 }}>{pc.name}</span> : <span style={{ color:"#ddd" }}>—</span>}</td><td style={{ color:"#1a3a5c", fontSize:11 }}>{bk?.name||"—"}</td><td style={{ fontSize:11 }}>{a.type}</td><td style={{ color:"#666", fontSize:11, maxWidth:160 }}>{a.description}</td><td style={{ color:"#1a3a5c", fontSize:11, maxWidth:140, fontWeight:500 }}>{a.nextAction}</td><td><StatusBadge status={a.status} /></td></tr>; })}</tbody>
-            </table>
+            {isMobile ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {fActivities.filter(a => firmF === "All" || a.sponsorId === firmF).map(a => { const sp=getSponsor(a.sponsorId); const ct=getContact(a.contactId); const bk=getBanker(a.lazardBankerId); return (
+                  <div key={a.id} onClick={() => setActDetail(a)} style={{ background: "#fff", border: "1px solid #eee", borderRadius: 3, padding: 14, boxShadow: "0 1px 4px rgba(0,0,0,0.03)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+                      <div>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: "#1a1a1a" }}>{sp?.name||"—"}</div>
+                        <div style={{ fontSize: 10, color: "#aaa" }}>{a.date} · {a.type}{ct ? ` · ${ct.name}` : ""}</div>
+                      </div>
+                      <StatusBadge status={a.status} />
+                    </div>
+                    <div style={{ fontSize: 11, color: "#666", marginBottom: a.nextAction ? 6 : 0 }}>{a.description}</div>
+                    {a.nextAction && <div style={{ fontSize: 11, color: "#1a3a5c", fontWeight: 500 }}>→ {a.nextAction}</div>}
+                  </div>
+                );})}
+              </div>
+            ) : (
+              <table className="tbl">
+                <thead><tr><th>Date</th><th>Firm</th><th>Contact</th><th>Portco</th><th>Lazard Banker</th><th>Type</th><th>Description</th><th>Next Action</th><th>Status</th></tr></thead>
+                <tbody>{fActivities.filter(a => firmF === "All" || a.sponsorId === firmF).map(a => { const sp=getSponsor(a.sponsorId); const ct=getContact(a.contactId); const bk=getBanker(a.lazardBankerId); const pc=getPortco(a.portcoId); return <tr key={a.id} onClick={() => setActDetail(a)}><td style={{ color:"#aaa", fontSize:11, whiteSpace:"nowrap" }}>{a.date}</td><td><span className="sn" style={{ fontSize:12 }}>{sp?.name||"—"}</span></td><td style={{ color:"#666", fontSize:11 }}>{ct?.name||"—"}</td><td style={{ fontSize:11 }}>{pc ? <span style={{ background:"#FDF6EE", color:"#7a4a1a", borderRadius:2, fontSize:10, padding:"2px 7px", fontWeight:500 }}>{pc.name}</span> : <span style={{ color:"#ddd" }}>—</span>}</td><td style={{ color:"#1a3a5c", fontSize:11 }}>{bk?.name||"—"}</td><td style={{ fontSize:11 }}>{a.type}</td><td style={{ color:"#666", fontSize:11, maxWidth:160 }}>{a.description}</td><td style={{ color:"#1a3a5c", fontSize:11, maxWidth:140, fontWeight:500 }}>{a.nextAction}</td><td><StatusBadge status={a.status} /></td></tr>; })}</tbody>
+              </table>
+            )}
           </>
         )}
 
@@ -1949,9 +2038,10 @@ export default function App() {
             <div className="pghdr"><div><div className="pgtit">Lazard Team</div><div className="pgsub">Internal Banker Directory</div></div><button className="abtn" onClick={() => setAddBanker(true)}>+ Add Banker</button></div>
             <div className="tb">
               <input className="si" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)} />
-              {["All","Sponsor Coverage",...SECTORS].map(s => <button key={s} className={`fb ${secF===s?"on":""}`} onClick={() => setSecF(s)} style={{ fontSize:9 }}>{s}</button>)}
+              {!isMobile && ["All","Sponsor Coverage",...SECTORS].map(s => <button key={s} className={`fb ${secF===s?"on":""}`} onClick={() => setSecF(s)} style={{ fontSize:9 }}>{s}</button>)}
+              {isMobile && <select className="si" style={{ flex: 1 }} value={secF} onChange={e => setSecF(e.target.value)}><option value="All">All Roles</option><option value="Sponsor Coverage">Sponsor Coverage</option>{SECTORS.map(s => <option key={s} value={s}>{s}</option>)}</select>}
             </div>
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(270px,1fr))", gap:12 }}>
+            <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(auto-fill,minmax(270px,1fr))", gap: isMobile ? 10 : 12 }}>
               {bankers.filter(b=>b.name.toLowerCase().includes(search.toLowerCase())&&(secF==="All"||b.sector===secF||( secF==="Sponsor Coverage"&&b.sponsorCoverage))).map(b => {
                 const covered = contacts.filter(c=>(c.lazardMappings||[]).includes(b.id));
                 const bActs = activities.filter(a=>a.lazardBankerId===b.id);
