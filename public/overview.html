@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FSG Coverage Intelligence — Lazard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0f2744;
+    --navy-mid: #1a3a5c;
+    --navy-light: #2a5080;
+    --gold: #c9a84c;
+    --gold-pale: #f0e4c0;
+    --gold-dim: #8a6e2a;
+    --cream: #faf8f4;
+    --white: #ffffff;
+    --text: #1a1a1a;
+    --muted: #7a7a7a;
+    --rule: #e0d8cc;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--cream);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--navy);
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header-noise {
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse 80% 60% at 70% 40%, rgba(201,168,76,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 80% at 10% 80%, rgba(42,80,128,0.4) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .header-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+
+  .header-inner {
+    position: relative;
+    z-index: 2;
+    padding: 40px 60px 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .wordmark {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: auto;
+  }
+
+  .wordmark-l {
+    width: 44px;
+    height: 44px;
+    background: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--navy);
+    flex-shrink: 0;
+  }
+
+  .wordmark-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    font-weight: 400;
+  }
+
+  .hero {
+    padding: 100px 0 120px;
+    max-width: 900px;
+  }
+
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.2s;
+  }
+
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(52px, 7vw, 88px);
+    font-weight: 300;
+    color: var(--white);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 0.9s ease forwards 0.35s;
+  }
+
+  .hero-title em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    color: rgba(255,255,255,0.55);
+    max-width: 560px;
+    line-height: 1.75;
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeUp 0.9s ease forwards 0.5s;
+    font-weight: 300;
+  }
+
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--gold);
+    color: var(--navy);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 14px 28px;
+    text-decoration: none;
+    transition: all 0.2s;
+    opacity: 0;
+    animation: fadeUp 0.9s ease forwards 0.65s;
+  }
+
+  .hero-cta:hover { background: #dbb85a; transform: translateY(-1px); }
+  .hero-cta svg { transition: transform 0.2s; }
+  .hero-cta:hover svg { transform: translateX(4px); }
+
+  .header-stats {
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    opacity: 0;
+    animation: fadeUp 1s ease forwards 0.8s;
+  }
+
+  .hstat {
+    padding: 28px 60px 28px 0;
+    border-right: 1px solid rgba(255,255,255,0.06);
+  }
+  .hstat:last-child { border-right: none; }
+
+  .hstat-n {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px;
+    font-weight: 300;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .hstat-l {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    font-weight: 400;
+  }
+
+  /* ── SECTIONS ── */
+  section {
+    padding: 100px 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 4vw, 52px);
+    font-weight: 300;
+    color: var(--navy);
+    line-height: 1.15;
+    margin-bottom: 20px;
+  }
+
+  .section-title em { font-style: italic; color: var(--navy-mid); }
+
+  .section-lead {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 560px;
+    line-height: 1.8;
+    margin-bottom: 60px;
+  }
+
+  hr.rule {
+    border: none;
+    border-top: 1px solid var(--rule);
+    margin: 0;
+  }
+
+  /* ── FEATURES GRID ── */
+  .features {
+    background: var(--white);
+    padding: 0;
+    max-width: 100%;
+  }
+
+  .features-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 100px 60px;
+  }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid var(--rule);
+    margin-top: 60px;
+  }
+
+  .feature-card {
+    padding: 40px 36px;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    position: relative;
+    transition: background 0.2s;
+  }
+
+  .feature-card:hover { background: #faf8f4; }
+  .feature-card:nth-child(3n) { border-right: none; }
+  .feature-card:nth-child(n+7) { border-bottom: none; }
+
+  .feature-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    color: var(--gold);
+    font-size: 18px;
+  }
+
+  .feature-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 10px;
+    line-height: 1.2;
+  }
+
+  .feature-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.75;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .how-bg {
+    background: var(--navy);
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .how-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 100px 60px;
+  }
+
+  .how-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 4vw, 52px);
+    font-weight: 300;
+    color: var(--white);
+    margin-bottom: 16px;
+  }
+
+  .how-lead {
+    font-size: 15px;
+    color: rgba(255,255,255,0.45);
+    max-width: 500px;
+    margin-bottom: 64px;
+  }
+
+  .flow {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    position: relative;
+  }
+
+  .flow::after {
+    content: '';
+    position: absolute;
+    top: 28px;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,168,76,0.3), rgba(201,168,76,0.3), transparent);
+    pointer-events: none;
+  }
+
+  .flow-step {
+    padding: 0 24px 0 0;
+    position: relative;
+  }
+
+  .flow-num {
+    width: 56px;
+    height: 56px;
+    border: 1px solid rgba(201,168,76,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 300;
+    color: var(--gold);
+    margin-bottom: 24px;
+    background: rgba(201,168,76,0.05);
+    position: relative;
+    z-index: 1;
+  }
+
+  .flow-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 10px;
+  }
+
+  .flow-desc {
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    line-height: 1.8;
+  }
+
+  /* ── SCREENS ── */
+  .screens {
+    background: var(--cream);
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .screens-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 100px 60px;
+  }
+
+  .screen-list {
+    display: flex;
+    flex-direction: column;
+    gap: 80px;
+    margin-top: 60px;
+  }
+
+  .screen-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+
+  .screen-item.reverse { direction: rtl; }
+  .screen-item.reverse > * { direction: ltr; }
+
+  .screen-mock {
+    background: var(--white);
+    border: 1px solid var(--rule);
+    box-shadow: 0 8px 40px rgba(15,39,68,0.08), 0 2px 8px rgba(15,39,68,0.04);
+    overflow: hidden;
+    aspect-ratio: 16/10;
+    position: relative;
+  }
+
+  .mock-bar {
+    background: var(--navy);
+    height: 36px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 8px;
+  }
+
+  .mock-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+  }
+
+  .mock-title-bar {
+    flex: 1;
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.3);
+  }
+
+  .mock-body {
+    padding: 20px;
+    height: calc(100% - 36px);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .mock-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .mock-tag {
+    height: 6px;
+    border-radius: 1px;
+    background: var(--navy);
+    opacity: 0.08;
+  }
+
+  .mock-accent {
+    height: 6px;
+    border-radius: 1px;
+    background: var(--gold);
+    opacity: 0.6;
+  }
+
+  .mock-stat-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+
+  .mock-stat {
+    background: var(--navy);
+    border-radius: 2px;
+    padding: 10px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .mock-stat-n {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    color: var(--white);
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .mock-stat-l {
+    height: 4px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 1px;
+    width: 60%;
+  }
+
+  .mock-table-head {
+    display: grid;
+    grid-template-columns: 0.4fr 1.2fr 0.8fr 1fr 0.7fr;
+    gap: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .mock-th {
+    height: 5px;
+    background: var(--muted);
+    opacity: 0.25;
+    border-radius: 1px;
+  }
+
+  .mock-tr {
+    display: grid;
+    grid-template-columns: 0.4fr 1.2fr 0.8fr 1fr 0.7fr;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+    align-items: center;
+  }
+
+  .mock-td {
+    height: 5px;
+    border-radius: 1px;
+    background: var(--navy);
+    opacity: 0.07;
+  }
+
+  .mock-pill {
+    height: 14px;
+    border-radius: 1px;
+    background: var(--gold);
+    opacity: 0.5;
+    width: 100%;
+  }
+
+  .mock-circle {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--navy);
+    opacity: 0.15;
+    flex-shrink: 0;
+  }
+
+  .screen-text { }
+
+  .screen-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    color: var(--gold-dim);
+    margin-bottom: 12px;
+  }
+
+  .screen-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 300;
+    color: var(--navy);
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+
+  .screen-desc {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.85;
+    margin-bottom: 24px;
+  }
+
+  .screen-bullets {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .screen-bullets li {
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .screen-bullets li::before {
+    content: '—';
+    color: var(--gold-dim);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ── TECH ── */
+  .tech-bg {
+    background: var(--white);
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .tech-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 100px 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  .tech-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 40px;
+  }
+
+  .tech-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border: 1px solid var(--rule);
+    transition: border-color 0.2s;
+  }
+
+  .tech-row:hover { border-color: var(--navy); }
+
+  .tech-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    background: var(--navy);
+    color: var(--gold);
+    padding: 4px 10px;
+    flex-shrink: 0;
+    min-width: 70px;
+    text-align: center;
+  }
+
+  .tech-label {
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 400;
+  }
+
+  .tech-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+
+  /* ── CLOSER ── */
+  .closer {
+    background: var(--navy);
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .closer-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 100px 60px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 60px;
+  }
+
+  .closer-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 4vw, 56px);
+    font-weight: 300;
+    color: var(--white);
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+
+  .closer-title em { font-style: italic; color: var(--gold); }
+
+  .closer-sub {
+    font-size: 15px;
+    color: rgba(255,255,255,0.4);
+    max-width: 480px;
+  }
+
+  .cta-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--gold);
+    color: var(--navy);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 16px 32px;
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-primary:hover { background: #dbb85a; }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.6);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 14px 32px;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover { border-color: rgba(255,255,255,0.4); color: var(--white); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--navy);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 32px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-left {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.2);
+    text-transform: uppercase;
+  }
+
+  .footer-right {
+    font-size: 11px;
+    color: rgba(255,255,255,0.2);
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    header .header-inner { padding: 32px 28px 0; }
+    .hero { padding: 60px 0 80px; }
+    .header-stats { grid-template-columns: repeat(2, 1fr); }
+    section, .features-inner, .how-inner, .screens-inner, .tech-inner, .closer-inner { padding: 60px 28px; }
+    .feature-grid { grid-template-columns: 1fr 1fr; }
+    .feature-card:nth-child(2n) { border-right: none; }
+    .feature-card:nth-child(3n) { border-right: 1px solid var(--rule); }
+    .flow { grid-template-columns: 1fr 1fr; gap: 40px; }
+    .flow::after { display: none; }
+    .screen-item, .screen-item.reverse { grid-template-columns: 1fr; direction: ltr; }
+    .tech-inner { grid-template-columns: 1fr; gap: 40px; }
+    .closer-inner { grid-template-columns: 1fr; }
+    footer { flex-direction: column; gap: 12px; text-align: center; }
+  }
+
+  @media (max-width: 600px) {
+    .feature-grid { grid-template-columns: 1fr; }
+    .feature-card:nth-child(n) { border-right: none; }
+    .flow { grid-template-columns: 1fr; }
+    .header-stats { grid-template-columns: 1fr 1fr; }
+    .hero-title { font-size: 42px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header>
+  <div class="header-noise"></div>
+  <div class="header-grid"></div>
+  <div class="header-inner">
+    <div class="wordmark">
+      <div class="wordmark-l">L</div>
+      <div class="wordmark-text">Lazard · Financial Sponsors Group</div>
+    </div>
+
+    <div class="hero">
+      <div class="hero-eyebrow">Work Product · Associate Interview</div>
+      <h1 class="hero-title">FSG Coverage<br><em>Intelligence</em></h1>
+      <p class="hero-sub">A purpose-built CRM for the Financial Sponsors Group — managing sponsor firm relationships, tracking deal mandates, and surfacing the coverage intelligence that drives mandate wins.</p>
+      <a href="https://lazard-fsg-crm.vercel.app" target="_blank" class="hero-cta">
+        Open the CRM
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+
+  </div>
+</header>
+
+<!-- ── NAV OVERVIEW ── -->
+<div class="features">
+  <div class="features-inner">
+    <div class="reveal">
+      <div class="section-eyebrow">How to navigate</div>
+      <h2 class="section-title">Eight tabs,<br><em>one connected system</em></h2>
+      <p class="section-lead">Each tab in the nav covers a distinct part of the coverage workflow. Everything links — click a firm to see its contacts, click a contact to see their activity, click a deal to see the full mandate history.</p>
+    </div>
+
+    <div class="feature-grid reveal">
+
+      <div class="feature-card">
+        <div class="feature-icon">◈</div>
+        <div class="feature-name">Dashboard</div>
+        <div class="feature-desc">The starting point. Five stat tiles at the top are all clickable — each one expands an inline panel with the underlying records. The "Tier 1 Gone Cold" tile shows any Tier 1 firm with no touchpoint in 60+ days. "Portcos Exploring Exit" surfaces active deal opportunities. Click any row to open the full detail.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">⬡</div>
+        <div class="feature-name">Firms</div>
+        <div class="feature-desc">The full sponsor universe, filterable by tier and sector. Click any row to open the firm page — you'll see the firm's contacts with their last five interactions listed inline, the portco grid with exit status, and any linked deals. A yellow warning banner appears if coverage has gone stale.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">◎</div>
+        <div class="feature-name">Contacts</div>
+        <div class="feature-desc">All deal team contacts across every covered firm. Click a contact to see their full profile — email, phone, recent deals, and which Lazard bankers are mapped to them. From a contact page you can log a new activity directly or navigate to their firm.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">⊗</div>
+        <div class="feature-name">Coverage Map</div>
+        <div class="feature-desc">A visual index of the firm → contact → Lazard banker relationship. Useful for a quick audit of who owns what — scan down to find any contact without a Lazard banker mapped, or to see how coverage is distributed across the sponsor coverage team.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">⊕</div>
+        <div class="feature-name">Activity Log</div>
+        <div class="feature-desc">Every logged touchpoint in reverse chronological order. Filter by firm or by type (Meeting, Pitch, Call, Conference). Click any row to see the full notes, outcome, and next action. Use the "+ Log Activity" button to record a new touchpoint from scratch.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">⟁</div>
+        <div class="feature-name">Deal Tracker</div>
+        <div class="feature-desc">All buy-side and sell-side mandates in one place — pitches, live mandates, and closed deals. Filter by status using the buttons at the top: Pitching, Mandated, Closed Won, Lost. Click a deal card to see the full description, linked portco, buy-side firms pitched, and all associated activity.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">⬕</div>
+        <div class="feature-name">LZ Team</div>
+        <div class="feature-desc">The internal Lazard banker directory. Sponsor coverage MDs are listed alongside sector bankers. Click any card to open a banker's profile — their full coverage universe, recent activity history, pitch record, and which sponsor contacts are mapped to them.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">⊞</div>
+        <div class="feature-name">Export</div>
+        <div class="feature-desc">Select which datasets to include using the checkboxes, then click Download. The output is a formatted .xlsx workbook — Dashboard tab with live COUNTIF formulas, plus separate tabs for Activity Log, Deals, Portfolio Companies, and Lazard Team. Formatted in Lazard navy and gold.</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<hr class="rule">
+
+<!-- ── WALKTHROUGH ── -->
+<div class="screens">
+  <div class="screens-inner">
+    <div class="reveal">
+      <div class="section-eyebrow">Step by step</div>
+      <h2 class="section-title">A typical<br><em>coverage workflow</em></h2>
+    </div>
+
+    <div class="screen-list">
+
+      <!-- Dashboard -->
+      <div class="screen-item reveal">
+        <div class="screen-mock">
+          <div class="mock-bar">
+            <div class="mock-dot"></div><div class="mock-dot"></div><div class="mock-dot"></div>
+            <div class="mock-title-bar">Dashboard</div>
+          </div>
+          <div class="mock-body">
+            <div class="mock-stat-row">
+              <div class="mock-stat"><div class="mock-stat-n">3</div><div class="mock-stat-l"></div></div>
+              <div class="mock-stat"><div class="mock-stat-n">5</div><div class="mock-stat-l"></div></div>
+              <div class="mock-stat"><div class="mock-stat-n">4</div><div class="mock-stat-l"></div></div>
+              <div class="mock-stat" style="background:rgba(201,168,76,0.15)"><div class="mock-stat-n" style="color:var(--gold)">2</div><div class="mock-stat-l"></div></div>
+              <div class="mock-stat"><div class="mock-stat-n">4</div><div class="mock-stat-l"></div></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:4px">
+              <div style="flex:1;height:5px;background:var(--gold);opacity:0.5;border-radius:1px"></div>
+              <div style="flex:2;height:5px;background:var(--navy);opacity:0.08;border-radius:1px"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:1">
+              <div style="background:rgba(15,39,68,0.04);padding:12px;border-radius:1px">
+                <div style="height:5px;width:60%;background:var(--navy);opacity:0.2;border-radius:1px;margin-bottom:10px"></div>
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <div class="mock-row"><div class="mock-circle"></div><div class="mock-tag" style="flex:1"></div><div class="mock-accent" style="width:40px"></div></div>
+                  <div class="mock-row"><div class="mock-circle"></div><div class="mock-tag" style="flex:1"></div><div class="mock-accent" style="width:50px;opacity:0.3"></div></div>
+                  <div class="mock-row"><div class="mock-circle"></div><div class="mock-tag" style="flex:1"></div><div class="mock-accent" style="width:30px;opacity:0.2"></div></div>
+                </div>
+              </div>
+              <div style="background:rgba(15,39,68,0.04);padding:12px;border-radius:1px">
+                <div style="height:5px;width:60%;background:var(--navy);opacity:0.2;border-radius:1px;margin-bottom:10px"></div>
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <div class="mock-row"><div class="mock-circle"></div><div class="mock-tag" style="flex:1"></div><div style="width:40px;height:6px;background:#c0392b;opacity:0.3;border-radius:1px"></div></div>
+                  <div class="mock-row"><div class="mock-circle"></div><div class="mock-tag" style="flex:1"></div><div style="width:50px;height:6px;background:#c0392b;opacity:0.2;border-radius:1px"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-text">
+          <div class="screen-num">Start here — Dashboard</div>
+          <div class="screen-name">Check what needs attention today</div>
+          <div class="screen-desc">Open the CRM and the Dashboard gives you an immediate read on the state of coverage. The five tiles at the top are your daily priorities — click any one to expand the detail panel below.</div>
+          <ul class="screen-bullets">
+            <li><strong>Tier 1 Gone Cold</strong> — click to see which Tier 1 firms are overdue for a touchpoint and jump straight to their firm page</li>
+            <li><strong>Pitches in Flight</strong> — click to see all active pitches with next actions listed</li>
+            <li><strong>Overdue Follow-ups</strong> — any logged activity where the next action date has passed</li>
+            <li><strong>Portcos Exploring Exit</strong> — click through to the portco and its linked deal</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Firm Page -->
+      <div class="screen-item reverse reveal">
+        <div class="screen-mock">
+          <div class="mock-bar">
+            <div class="mock-dot"></div><div class="mock-dot"></div><div class="mock-dot"></div>
+            <div class="mock-title-bar">Firms → Blackstone</div>
+          </div>
+          <div class="mock-body">
+            <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px">
+              <div style="width:32px;height:32px;background:var(--navy);flex-shrink:0"></div>
+              <div style="flex:1">
+                <div style="height:7px;width:80px;background:var(--navy);opacity:0.7;border-radius:1px;margin-bottom:5px"></div>
+                <div style="height:5px;width:120px;background:var(--navy);opacity:0.15;border-radius:1px"></div>
+              </div>
+              <div style="width:70px;height:20px;background:var(--gold);opacity:0.4;border-radius:1px"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">
+              <div style="background:rgba(15,39,68,0.05);padding:8px;border-radius:1px"><div style="height:4px;background:var(--navy);opacity:0.15;border-radius:1px;margin-bottom:5px"></div><div style="height:6px;width:60%;background:var(--navy);opacity:0.5;border-radius:1px"></div></div>
+              <div style="background:rgba(15,39,68,0.05);padding:8px;border-radius:1px"><div style="height:4px;background:var(--navy);opacity:0.15;border-radius:1px;margin-bottom:5px"></div><div style="height:6px;width:40%;background:var(--navy);opacity:0.5;border-radius:1px"></div></div>
+              <div style="background:rgba(15,39,68,0.05);padding:8px;border-radius:1px"><div style="height:4px;background:var(--navy);opacity:0.15;border-radius:1px;margin-bottom:5px"></div><div style="height:6px;width:50%;background:var(--gold);opacity:0.5;border-radius:1px"></div></div>
+              <div style="background:rgba(15,39,68,0.05);padding:8px;border-radius:1px"><div style="height:4px;background:var(--navy);opacity:0.15;border-radius:1px;margin-bottom:5px"></div><div style="height:6px;width:70%;background:var(--navy);opacity:0.3;border-radius:1px"></div></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="border:1px solid var(--rule);padding:10px;background:white">
+                <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+                  <div style="width:24px;height:24px;border-radius:50%;background:var(--navy);opacity:0.15"></div>
+                  <div style="flex:1"><div style="height:6px;width:70%;background:var(--navy);opacity:0.5;border-radius:1px;margin-bottom:3px"></div><div style="height:4px;width:50%;background:var(--navy);opacity:0.1;border-radius:1px"></div></div>
+                  <div style="width:50px;height:14px;background:var(--gold);opacity:0.35;border-radius:1px"></div>
+                </div>
+                <div style="padding-left:32px;display:flex;flex-direction:column;gap:4px">
+                  <div style="height:4px;background:var(--navy);opacity:0.07;border-radius:1px"></div>
+                  <div style="height:4px;width:80%;background:var(--navy);opacity:0.05;border-radius:1px"></div>
+                </div>
+              </div>
+              <div style="border:1px solid var(--rule);padding:10px;background:white;opacity:0.6">
+                <div style="display:flex;gap:8px;align-items:center">
+                  <div style="width:24px;height:24px;border-radius:50%;background:var(--navy);opacity:0.1"></div>
+                  <div style="flex:1"><div style="height:6px;width:60%;background:var(--navy);opacity:0.4;border-radius:1px"></div></div>
+                  <div style="width:40px;height:14px;background:#e74c3c;opacity:0.2;border-radius:1px"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-text">
+          <div class="screen-num">Firms tab → firm page</div>
+          <div class="screen-name">Everything about a sponsor in one view</div>
+          <div class="screen-desc">Click any firm in the Firms tab to open its dedicated page. From here you can see the full picture of your relationship with that sponsor without navigating away.</div>
+          <ul class="screen-bullets">
+            <li>Contacts are listed with their last five interactions expanded inline — no need to click through to each contact</li>
+            <li>The portco grid shows each portfolio company with exit status — click a portco to see its linked deal</li>
+            <li>A yellow stale coverage banner appears if the firm hasn't been touched in 45+ days</li>
+            <li>Use "+ Log Activity" at the top right to record a new touchpoint directly against this firm</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Deal Tracker -->
+      <div class="screen-item reveal">
+        <div class="screen-mock">
+          <div class="mock-bar">
+            <div class="mock-dot"></div><div class="mock-dot"></div><div class="mock-dot"></div>
+            <div class="mock-title-bar">Deals · Pitching / Mandated / Closed</div>
+          </div>
+          <div class="mock-body">
+            <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+              <div style="padding:4px 12px;background:var(--navy);border-radius:1px;height:22px;width:35px;opacity:0.9"></div>
+              <div style="padding:4px 12px;border:1px solid var(--gold);border-radius:1px;height:22px;width:58px;background:rgba(201,168,76,0.08)"></div>
+              <div style="padding:4px 12px;border:1px solid var(--rule);border-radius:1px;height:22px;width:65px;opacity:0.35"></div>
+              <div style="padding:4px 12px;border:1px solid var(--rule);border-radius:1px;height:22px;width:70px;opacity:0.25"></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="border:1px solid var(--rule);padding:14px;background:white">
+                <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+                  <div style="height:7px;flex:1;background:var(--navy);opacity:0.6;border-radius:1px"></div>
+                  <div style="width:60px;height:16px;background:var(--gold);opacity:0.5;border-radius:1px"></div>
+                  <div style="width:65px;height:16px;background:#27ae60;opacity:0.25;border-radius:1px"></div>
+                </div>
+                <div style="height:5px;width:85%;background:var(--navy);opacity:0.07;border-radius:1px;margin-bottom:10px"></div>
+                <div style="display:flex;gap:20px">
+                  <div><div style="height:3px;width:35px;background:var(--muted);opacity:0.2;border-radius:1px;margin-bottom:5px"></div><div style="height:5px;width:70px;background:var(--navy);opacity:0.4;border-radius:1px"></div></div>
+                  <div><div style="height:3px;width:45px;background:var(--muted);opacity:0.2;border-radius:1px;margin-bottom:5px"></div><div style="height:5px;width:90px;background:var(--navy);opacity:0.2;border-radius:1px"></div></div>
+                  <div><div style="height:3px;width:30px;background:var(--muted);opacity:0.2;border-radius:1px;margin-bottom:5px"></div><div style="height:5px;width:20px;background:var(--navy);opacity:0.35;border-radius:1px"></div></div>
+                </div>
+              </div>
+              <div style="border:1px solid var(--rule);padding:14px;opacity:0.55;background:white">
+                <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+                  <div style="height:7px;flex:1;background:var(--navy);opacity:0.5;border-radius:1px"></div>
+                  <div style="width:60px;height:16px;background:var(--gold);opacity:0.35;border-radius:1px"></div>
+                  <div style="width:55px;height:16px;background:var(--navy);opacity:0.2;border-radius:1px"></div>
+                </div>
+                <div style="height:5px;width:70%;background:var(--navy);opacity:0.05;border-radius:1px"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-text">
+          <div class="screen-num">Deals tab</div>
+          <div class="screen-name">Track pitches and mandates together</div>
+          <div class="screen-desc">The Deals tab covers everything from first pitch to close in a single pipeline view. Use the status filter buttons at the top to cut the view — click "Pitching" to see only active pitches, "Mandated" for live mandates.</div>
+          <ul class="screen-bullets">
+            <li>Each deal card shows the sponsor firm, linked portco, Lazard role (buy-side or sell-side), and current status</li>
+            <li>Click a card to open the full deal modal — description, notes, buy-side firms pitched, and all logged activity against that deal</li>
+            <li>The activity count on each card tells you how much relationship work has gone into it</li>
+            <li>Add a new deal with the "+ Add Deal" button — it will immediately appear in the pipeline and can be linked to portcos and activities</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<hr class="rule">
+
+<!-- ── CLOSER ── -->
+<div class="closer">
+  <div class="closer-inner">
+    <div class="reveal">
+      <h2 class="closer-title">Built for<br><em>Lazard FSG</em></h2>
+      <p class="closer-sub">A functional work product designed around how the sponsor coverage team actually operates — from first cold call to mandate close.</p>
+    </div>
+    <div class="cta-group reveal">
+      <a href="https://lazard-fsg-crm.vercel.app" target="_blank" class="btn-primary">
+        Open the CRM
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a href="https://github.com/milanwilliams123/lazard-fsg-crm" target="_blank" class="btn-secondary">View Source</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-left">Lazard · Financial Sponsors Group · FSG Coverage Intelligence</div>
+  <div class="footer-right">Work Product · Milan Williams</div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        e.target.style.transitionDelay = (i * 0.08) + 's';
+        e.target.classList.add('visible');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(r => io.observe(r));
+</script>
+</body>
+</html>
